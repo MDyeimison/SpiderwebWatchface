@@ -326,13 +326,14 @@ WatchFace({
         var dateStr = dStr + '.' + moStr + '.' + this.year
 
         // Top Centered Date
-        cv.setPaint({ color: COLOR_DATE, font_size: 22 })
-        cv.drawText({ x: CX - centerOffsetX(dateStr, 12), y: 35, w: 200, h: 50, text: dateStr })
+        cv.setPaint({ color: COLOR_DATE, font_size: 20 })
+        // A character is ~10px at font size 20, 10 chars = 100px. Offset = 50.
+        cv.drawText({ x: CX - 50, y: 40, w: 120, h: 40, text: dateStr })
 
         // Vertically Stacked Time on the Right Margin
-        cv.setPaint({ color: COLOR_TIME, font_size: 96 })
-        cv.drawText({ x: 330, y: 155, w: 150, h: 120, text: hStr })
-        cv.drawText({ x: 330, y: 225, w: 150, h: 120, text: mStr })
+        cv.setPaint({ color: COLOR_TIME, font_size: 78 })
+        cv.drawText({ x: 365, y: 155, w: 100, h: 90, text: hStr })
+        cv.drawText({ x: 365, y: 220, w: 100, h: 90, text: mStr })
     },
 
     _drawBattery: function (cv) {
