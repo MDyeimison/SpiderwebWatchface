@@ -5,8 +5,8 @@
         "appName": "SpiderWeb Health",
         "appType": "watchface",
         "version": {
-            "code": 1,
-            "name": "1.0.0"
+            "code": 2,
+            "name": "2.0.0"
         },
         "icon": "icon.png",
         "cover": [
@@ -17,39 +17,28 @@
     },
     "runtime": {
         "apiVersion": {
-            "compatible": "1.0.0",
-            "target": "1.0.1",
-            "minVersion": "1.0.0"
+            "compatible": "2.0",
+            "target": "2.0",
+            "minVersion": "2.0"
         }
     },
     "permissions": [],
     "targets": {
-        "gts-4": {
+        "gtr-3-pro": {
             "module": {
                 "watchface": {
-                    "path": "watchface/index",
+                    "path": "watchface/gtr-3-pro/index",
                     "main": 1,
                     "editable": 1,
-                    "lockscreen": 1,
-                    "photoscreen": 0,
-                    "hightCost": 0
+                    "lockscreen": 1
                 }
             },
             "platforms": [
                 {
-                    "name": "Amazfit Bip 6",
-                    "deviceSource": 9765120
-                },
-                {
-                    "name": "Amazfit Bip 6",
-                    "deviceSource": 9765121
-                },
-                {
-                    "name": "Amazfit Bip 6",
-                    "deviceSource": 10158337
+                    "st": "r"
                 }
             ],
-            "designWidth": 390
+            "designWidth": 480
         }
     },
     "i18n": {
