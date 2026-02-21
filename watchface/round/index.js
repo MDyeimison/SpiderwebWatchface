@@ -11,13 +11,13 @@ import { Time, HeartRate, Step, Calorie, Distance, Stress, BloodOxygen, Battery 
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-var W = 390   // screen width
-var H = 450   // screen height
+var W = 466   // screen width
+var H = 466   // screen height
 
 // Radar chart geometry
-var CX = 195   // center X
-var CY = 250   // center Y
-var R = 118   // max radar radius (px)
+var CX = 233   // center X
+var CY = 245   // center Y
+var R = 150   // max radar radius (px)
 var RINGS = 5     // concentric rings
 
 // Color palette
@@ -209,26 +209,25 @@ WatchFace({
 
     _drawBackground: function (cv) {
         cv.setPaint({ color: COLOR_BG })
-        cv.drawRect({ x1: 0, y1: 0, x2: W, y2: H })
+        cv.drawRect({ x: 0, y: 0, w: W, h: H })
         cv.setPaint({ color: COLOR_BG_BAND })
-        cv.drawRect({ x1: 0, y1: 0, x2: W, y2: 100 })
-        cv.drawRect({ x1: 0, y1: 405, x2: W, y2: H })
+        cv.drawRect({ x: 0, y: 0, w: W, h: 105 })
+        cv.drawRect({ x: 0, y: 420, w: W, h: H - 420 })
         cv.setPaint({ color: 0x1A1D3A, line_width: 1 })
-        cv.drawLine({ x0: 20, y0: 100, x1: W - 20, y1: 100 })
-        cv.drawLine({ x0: 20, y0: 405, x1: W - 20, y1: 405 })
+        cv.drawLine({ x1: 30, y1: 105, x2: W - 30, y2: 105 })
+        cv.drawLine({ x1: 30, y1: 420, x2: W - 30, y2: 420 })
     },
 
     _drawGrid: function (cv) {
         for (var ring = 1; ring <= RINGS; ring++) {
             var r = Math.round((ring / RINGS) * R)
-            var xs = [], ys = []
+            var pts = []
             for (var i = 0; i < N; i++) {
                 var a = axisAngle(i)
-                xs.push(polarX(r, a))
-                ys.push(polarY(r, a))
+                pts.push({ x: polarX(r, a), y: polarY(r, a) })
             }
             cv.setPaint({ color: ring === RINGS ? COLOR_GRID_OUTER : COLOR_GRID_INNER, line_width: ring === RINGS ? 2 : 1 })
-            cv.strokePoly({ x_array: xs, y_array: ys })
+            cv.strokePoly({ data_array: pts })
         }
     },
 
@@ -236,38 +235,37 @@ WatchFace({
         cv.setPaint({ color: COLOR_AXIS, line_width: 1 })
         for (var i = 0; i < N; i++) {
             var a = axisAngle(i)
-            cv.drawLine({ x0: CX, y0: CY, x1: polarX(R, a), y1: polarY(R, a) })
+            cv.drawLine({ x1: CX, y1: CY, x2: polarX(R, a), y2: polarY(R, a) })
         }
         cv.setPaint({ color: COLOR_ACCENT })
-        cv.drawCircle({ cx: CX, cy: CY, radius: 4 })
+        cv.drawCircle({ x: CX, y: CY, radius: 4 })
         cv.setPaint({ color: 0xFFFFFF })
-        cv.drawCircle({ cx: CX, cy: CY, radius: 2 })
+        cv.drawCircle({ x: CX, y: CY, radius: 2 })
     },
 
     _drawDataPolygon: function (cv) {
-        var dxs = [], dys = []
+        var pts = []
         for (var i = 0; i < N; i++) {
             var norm = clamp01(this.values[i] / METRICS[i].max)
             var r = norm > 0.02 ? Math.round(norm * R) : 6
             var a = axisAngle(i)
-            dxs.push(polarX(r, a))
-            dys.push(polarY(r, a))
+            pts.push({ x: polarX(r, a), y: polarY(r, a) })
         }
         // Fill
         cv.setPaint({ color: COLOR_FILL })
-        cv.drawPoly({ x_array: dxs, y_array: dys })
+        cv.drawPoly({ data_array: pts })
         // Glow stroke
         cv.setPaint({ color: COLOR_FILL2, line_width: 3 })
-        cv.strokePoly({ x_array: dxs, y_array: dys })
+        cv.strokePoly({ data_array: pts })
         // Neon cyan main stroke
         cv.setPaint({ color: COLOR_STROKE, line_width: 2 })
-        cv.strokePoly({ x_array: dxs, y_array: dys })
+        cv.strokePoly({ data_array: pts })
         // Vertex dots
         for (var j = 0; j < N; j++) {
             cv.setPaint({ color: METRICS[j].color })
-            cv.drawCircle({ cx: dxs[j], cy: dys[j], radius: 5 })
+            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 5 })
             cv.setPaint({ color: 0xFFFFFF })
-            cv.drawCircle({ cx: dxs[j], cy: dys[j], radius: 2 })
+            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 2 })
         }
     },
 
@@ -300,27 +298,27 @@ WatchFace({
     _drawTime: function (cv) {
         var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
         var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
-        cv.setPaint({ color: COLOR_TIME, font_size: 56 })
-        cv.drawText({ x: 40, y: 12, w: 320, text: hStr + ':' + mStr })
+        cv.setPaint({ color: COLOR_TIME, font_size: 64 })
+        cv.drawText({ x: 120, y: 12, w: 320, text: hStr + ':' + mStr })
 
         var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         var dateStr = DAYS[this.weekDay] + '  ' + this.day + ' ' + MONTHS[this.month - 1]
-        cv.setPaint({ color: COLOR_DATE, font_size: 19 })
-        cv.drawText({ x: 95, y: 72, w: 220, text: dateStr })
+        cv.setPaint({ color: COLOR_DATE, font_size: 22 })
+        cv.drawText({ x: 170, y: 80, w: 220, text: dateStr })
     },
 
     _drawBattery: function (cv) {
         var b = this.batt
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
-        cv.setPaint({ color: col, font_size: 17 })
-        cv.drawText({ x: 100, y: 414, w: 200, text: 'BATTERY  ' + b + '%' })
+        cv.setPaint({ color: col, font_size: 20 })
+        cv.drawText({ x: 135, y: 430, w: 200, text: 'BATTERY  ' + b + '%' })
 
-        var barX = 115, barY = 436, barW = 160, barH = 6
+        var barX = 153, barY = 455, barW = 160, barH = 6
         cv.setPaint({ color: 0x1E2040 })
-        cv.drawRect({ x1: barX, y1: barY, x2: barX + barW, y2: barY + barH })
+        cv.drawRect({ x: barX, y: barY, w: barW, h: barH })
         cv.setPaint({ color: col })
-        cv.drawRect({ x1: barX, y1: barY, x2: barX + Math.round((b / 100) * barW), y2: barY + barH })
+        cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH })
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
