@@ -208,11 +208,12 @@ WatchFace({
     },
 
     _drawBackground: function (cv) {
+        if (cv.clear) { cv.clear({ x: 0, y: 0, w: W, h: H }) }
         cv.setPaint({ color: COLOR_BG })
-        cv.drawRect({ x: 0, y: 0, w: W, h: H })
+        cv.drawRect({ x: 0, y: 0, w: W, h: H, color: COLOR_BG })
         cv.setPaint({ color: COLOR_BG_BAND })
-        cv.drawRect({ x: 0, y: 0, w: W, h: 105 })
-        cv.drawRect({ x: 0, y: 420, w: W, h: H - 420 })
+        cv.drawRect({ x: 0, y: 0, w: W, h: 105, color: COLOR_BG_BAND })
+        cv.drawRect({ x: 0, y: 420, w: W, h: H - 420, color: COLOR_BG_BAND })
         cv.setPaint({ color: 0x1A1D3A, line_width: 1 })
         cv.drawLine({ x1: 30, y1: 105, x2: W - 30, y2: 105 })
         cv.drawLine({ x1: 30, y1: 420, x2: W - 30, y2: 420 })
@@ -253,19 +254,19 @@ WatchFace({
         }
         // Fill
         cv.setPaint({ color: COLOR_FILL })
-        cv.drawPoly({ data_array: pts })
+        cv.drawPoly({ data_array: pts, color: COLOR_FILL, drawFill: true })
         // Glow stroke
         cv.setPaint({ color: COLOR_FILL2, line_width: 3 })
-        cv.strokePoly({ data_array: pts })
+        cv.strokePoly({ data_array: pts, color: COLOR_FILL2 })
         // Neon cyan main stroke
         cv.setPaint({ color: COLOR_STROKE, line_width: 2 })
-        cv.strokePoly({ data_array: pts })
+        cv.strokePoly({ data_array: pts, color: COLOR_STROKE })
         // Vertex dots
         for (var j = 0; j < N; j++) {
             cv.setPaint({ color: METRICS[j].color })
-            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 5 })
+            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 5, color: METRICS[j].color })
             cv.setPaint({ color: 0xFFFFFF })
-            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 2 })
+            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 2, color: 0xFFFFFF })
         }
     },
 
@@ -278,13 +279,13 @@ WatchFace({
 
             // Metric name
             var label = METRICS[i].label
-            cv.setPaint({ color: METRICS[i].color, font_size: 17 })
-            cv.drawText({ x: lx - centerOffsetX(label, 9), y: ly - 10, w: label.length * 11, text: label })
+            cv.setPaint({ color: METRICS[i].color, font_size: 15 })
+            cv.drawText({ x: lx - centerOffsetX(label, 8), y: ly - 8, w: label.length * 11, text: label })
 
             // Current value
             var valStr = this._formatValue(i)
-            cv.setPaint({ color: COLOR_VALUE, font_size: 14 })
-            cv.drawText({ x: lx - centerOffsetX(valStr, 7.5), y: ly + 8, w: valStr.length * 10, text: valStr })
+            cv.setPaint({ color: COLOR_VALUE, font_size: 13 })
+            cv.drawText({ x: lx - centerOffsetX(valStr, 6.5), y: ly + 10, w: valStr.length * 10, text: valStr })
         }
     },
 
@@ -298,27 +299,27 @@ WatchFace({
     _drawTime: function (cv) {
         var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
         var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
-        cv.setPaint({ color: COLOR_TIME, font_size: 64 })
-        cv.drawText({ x: 120, y: 12, w: 320, text: hStr + ':' + mStr })
+        cv.setPaint({ color: COLOR_TIME, font_size: 54 })
+        cv.drawText({ x: 155, y: 30, w: 320, text: hStr + ':' + mStr })
 
         var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         var dateStr = DAYS[this.weekDay] + '  ' + this.day + ' ' + MONTHS[this.month - 1]
-        cv.setPaint({ color: COLOR_DATE, font_size: 22 })
-        cv.drawText({ x: 170, y: 80, w: 220, text: dateStr })
+        cv.setPaint({ color: COLOR_DATE, font_size: 18 })
+        cv.drawText({ x: 175, y: 84, w: 220, text: dateStr })
     },
 
     _drawBattery: function (cv) {
         var b = this.batt
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
-        cv.setPaint({ color: col, font_size: 20 })
-        cv.drawText({ x: 135, y: 430, w: 200, text: 'BATTERY  ' + b + '%' })
+        cv.setPaint({ color: col, font_size: 16 })
+        cv.drawText({ x: 165, y: 430, w: 200, text: 'BATTERY  ' + b + '%' })
 
-        var barX = 153, barY = 455, barW = 160, barH = 6
+        var barX = 153, barY = 448, barW = 160, barH = 6
         cv.setPaint({ color: 0x1E2040 })
-        cv.drawRect({ x: barX, y: barY, w: barW, h: barH })
+        cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
         cv.setPaint({ color: col })
-        cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH })
+        cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH, color: col })
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
