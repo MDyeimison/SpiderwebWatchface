@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "description": "Spider web radar health metrics watchface for Amazfit Bip 6",
     "scripts": {
-        "dev": "zeus dev",
-        "build": "zeus build",
-        "preview": "zeus preview"
+        "dev": "npx @zeppos/zeus-cli dev",
+        "build": "npx @zeppos/zeus-cli build",
+        "preview": "npx @zeppos/zeus-cli preview"
     },
     "zepp": {
         "appType": "watchface"

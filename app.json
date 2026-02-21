@@ -9,6 +9,9 @@
             "name": "1.0.0"
         },
         "icon": "icon.png",
+        "cover": [
+            "2.png"
+        ],
         "vender": "Custom",
         "description": "Spider web radar chart health metrics watchface for Amazfit Bip 6"
     },
@@ -21,13 +24,13 @@
     },
     "permissions": [],
     "targets": {
-        "amazfit-bip-6": {
+        "gts-4": {
             "module": {
                 "watchface": {
                     "path": "watchface/index",
                     "main": 1,
-                    "editable": 0,
-                    "lockscreen": 0,
+                    "editable": 1,
+                    "lockscreen": 1,
                     "photoscreen": 0,
                     "hightCost": 0
                 }
