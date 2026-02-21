@@ -16,8 +16,8 @@ var H = 466   // screen height
 
 // Radar chart geometry
 var CX = 233   // center X
-var CY = 245   // center Y
-var R = 150   // max radar radius (px)
+var CY = 240   // center y (moved up slightly)
+var R = 120   // max radar radius (px) (shrunk to fit icons)
 var RINGS = 5     // concentric rings
 
 // Color palette
@@ -232,11 +232,11 @@ WatchFace({
         cv.setPaint({ color: COLOR_BG })
         cv.drawRect({ x: 0, y: 0, w: W, h: H, color: COLOR_BG })
         cv.setPaint({ color: COLOR_BG_BAND })
-        cv.drawRect({ x: 0, y: 0, w: W, h: 105, color: COLOR_BG_BAND })
-        cv.drawRect({ x: 0, y: 420, w: W, h: H - 420, color: COLOR_BG_BAND })
+        cv.drawRect({ x: 0, y: 0, w: W, h: 115, color: COLOR_BG_BAND })
+        cv.drawRect({ x: 0, y: 400, w: W, h: H - 400, color: COLOR_BG_BAND })
         cv.setPaint({ color: 0x1A1D3A, line_width: 1 })
-        cv.drawLine({ x1: 30, y1: 105, x2: W - 30, y2: 105 })
-        cv.drawLine({ x1: 30, y1: 420, x2: W - 30, y2: 420 })
+        cv.drawLine({ x1: 30, y1: 115, x2: W - 30, y2: 115 })
+        cv.drawLine({ x1: 30, y1: 400, x2: W - 30, y2: 400 })
     },
 
     _drawGrid: function (cv) {
@@ -329,23 +329,23 @@ WatchFace({
     _drawTime: function (cv) {
         var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
         var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
-        cv.setPaint({ color: COLOR_TIME, font_size: 54 })
-        cv.drawText({ x: 155, y: 30, w: 320, text: hStr + ':' + mStr })
+        cv.setPaint({ color: COLOR_TIME, font_size: 58 })
+        cv.drawText({ x: 145, y: 35, w: 320, text: hStr + ':' + mStr })
 
         var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         var dateStr = DAYS[this.weekDay] + '  ' + this.day + ' ' + MONTHS[this.month - 1]
         cv.setPaint({ color: COLOR_DATE, font_size: 18 })
-        cv.drawText({ x: 175, y: 84, w: 220, text: dateStr })
+        cv.drawText({ x: 160, y: 92, w: 220, text: dateStr })
     },
 
     _drawBattery: function (cv) {
         var b = this.batt
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
         cv.setPaint({ color: col, font_size: 16 })
-        cv.drawText({ x: 165, y: 430, w: 200, text: 'BATTERY  ' + b + '%' })
+        cv.drawText({ x: 165, y: 410, w: 200, text: 'BATTERY  ' + b + '%' })
 
-        var barX = 153, barY = 448, barW = 160, barH = 6
+        var barX = 153, barY = 432, barW = 160, barH = 6
         cv.setPaint({ color: 0x1E2040 })
         cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
         cv.setPaint({ color: col })
