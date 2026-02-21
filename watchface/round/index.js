@@ -18,7 +18,7 @@ var R = 118   // max radar radius (px)
 var RINGS = 5     // concentric rings
 
 // Color palette
-var COLOR_BG = 0x080B14
+var COLOR_BG = 0x0000FF
 var COLOR_BG_BAND = 0x0D1020
 var COLOR_GRID_OUTER = 0x383870
 var COLOR_GRID_INNER = 0x1A1D3A
