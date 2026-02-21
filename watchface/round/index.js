@@ -294,27 +294,21 @@ WatchFace({
             var h = 30
 
             var label = METRICS[i].label
-            cv.setPaint({ color: METRICS[i].color, font_size: 14 })
+            cv.setPaint({ color: METRICS[i].color, font_size: 15 })
             cv.drawText({
-                x: lx - (w / 2),
-                y: ly - (h / 2) - 10,
-                w: w, h: h,
-                text: label,
-                angle: deg,
-                align_h: hmUI.align.CENTER_H,
-                align_v: hmUI.align.CENTER_V
+                x: lx - centerOffsetX(label, 9),
+                y: ly - 16,
+                w: label.length * 15, h: 30,
+                text: label
             })
 
             var valStr = this._formatValue(i)
             cv.setPaint({ color: COLOR_VALUE, font_size: 14 })
             cv.drawText({
-                x: lx - (w / 2),
-                y: ly - (h / 2) + 10,
-                w: w, h: h,
-                text: valStr,
-                angle: deg,
-                align_h: hmUI.align.CENTER_H,
-                align_v: hmUI.align.CENTER_V
+                x: lx - centerOffsetX(valStr, 8.5),
+                y: ly + 4,
+                w: valStr.length * 15, h: 30,
+                text: valStr
             })
         }
     },
