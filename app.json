@@ -1,38 +1,50 @@
 {
-    "configFileVersion": "v3",
-    "appId": 1106837,
-    "appName": "SpiderWeb Health",
-    "appType": "watchface",
-    "version": {
-        "code": 1,
-        "name": "1.0.0"
+    "configVersion": "v3",
+    "app": {
+        "appId": 1106837,
+        "appName": "SpiderWeb Health",
+        "appType": "watchface",
+        "version": {
+            "code": 1,
+            "name": "1.0.0"
+        },
+        "icon": "icon.png",
+        "vender": "Custom",
+        "description": "Spider web radar chart health metrics watchface for Amazfit Bip 6"
     },
-    "icon": "assets/icon.png",
-    "vender": "Custom",
-    "description": "Spider web radar chart health metrics watchface for Amazfit Bip 6",
+    "runtime": {
+        "apiVersion": {
+            "compatible": "1.0.0",
+            "target": "1.0.1",
+            "minVersion": "1.0.0"
+        }
+    },
+    "permissions": [],
+    "targets": {
+        "amazfit-bip-6": {
+            "module": {
+                "watchface": {
+                    "path": "watchface/index",
+                    "main": 1,
+                    "editable": 0,
+                    "lockscreen": 0,
+                    "photoscreen": 0,
+                    "hightCost": 0
+                }
+            },
+            "platforms": [
+                {
+                    "st": "r"
+                }
+            ],
+            "designWidth": 390
+        }
+    },
     "i18n": {
         "en-US": {
             "appName": "SpiderWeb Health"
         }
     },
-    "targets": {
-        "amazfit-bip-6": {
-            "designWidth": 390,
-            "screenShape": "rectangle",
-            "deviceSources": [
-                {
-                    "deviceName": "Amazfit Bip 6",
-                    "deviceSource": 250000063
-                }
-            ]
-        }
-    },
-    "module": {
-        "app": {
-            "path": "app"
-        },
-        "watchface": {
-            "path": "watchface/index"
-        }
-    }
+    "defaultLanguage": "en-US",
+    "debug": false
 }
