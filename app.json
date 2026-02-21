@@ -24,10 +24,10 @@
     },
     "permissions": [],
     "targets": {
-        "gtr-3-pro": {
+        "gtr-4": {
             "module": {
                 "watchface": {
-                    "path": "watchface/gtr-3-pro/index",
+                    "path": "watchface/gtr-4/index",
                     "main": 1,
                     "editable": 1,
                     "lockscreen": 1
@@ -38,7 +38,7 @@
                     "st": "r"
                 }
             ],
-            "designWidth": 480
+            "designWidth": 466
         }
     },
     "i18n": {
