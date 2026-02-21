@@ -1,10 +1,13 @@
 /**
- * SpiderWeb Health - ZepOS Watch Face for Amazfit Bip 6
- * API Level 1.x — uses hmUI / hmSensor globals (no @zos/* imports)
+ * SpiderWeb Health - ZepOS Watch Face for Amazfit GTR 4
+ * API Level 2.0 — uses @zos/ui and @zos/sensor imports
  *
  * Radar chart with 6 health metrics: HR, Steps, Calories, Distance, Stress, SpO2
- * Screen: 390 x 450 px (AMOLED)
+ * Screen: 466 x 466 px (AMOLED)
  */
+import ui from '@zos/ui'
+import { Time, HeartRate, Step, Calorie, Distance, Stress, BloodOxygen, Battery } from '@zos/sensor'
+
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -91,7 +94,7 @@ WatchFace({
     // ── Canvas ───────────────────────────────────────────────────────────────────
 
     _createCanvas: function () {
-        this.cv = hmUI.createWidget(hmUI.widget.CANVAS, {
+        this.cv = ui.createWidget(ui.widget.CANVAS, {
             x: 0, y: 0, w: W, h: H
         })
     },
@@ -103,9 +106,9 @@ WatchFace({
 
         // ── Time (primary redraw trigger) ──
         try {
-            var timeSensor = hmSensor.createSensor(hmSensor.id.TIME)
+            var timeSensor = new Time()
             self._updateTime(timeSensor)
-            timeSensor.addEventListener(hmSensor.event.CHANGE, function () {
+            timeSensor.onPerMinute(function () {
                 self._updateTime(timeSensor)
                 self._draw()
             })
@@ -113,82 +116,81 @@ WatchFace({
 
         // ── Heart Rate ──
         try {
-            var hrSensor = hmSensor.createSensor(hmSensor.id.HEART_RATE)
-            hrSensor.start()
-            self.values[0] = hrSensor.current || 0
-            hrSensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.values[0] = hrSensor.current || 0
+            var hrSensor = new HeartRate()
+            self.values[0] = hrSensor.getLast() || 0
+            hrSensor.onLastChange(function () {
+                self.values[0] = hrSensor.getLast() || 0
                 self._draw()
             })
         } catch (e) { }
 
         // ── Steps ──
         try {
-            var stepSensor = hmSensor.createSensor(hmSensor.id.STEP)
-            self.values[1] = stepSensor.current || 0
-            stepSensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.values[1] = stepSensor.current || 0
+            var stepSensor = new Step()
+            self.values[1] = stepSensor.getCurrent() || 0
+            stepSensor.onChange(function () {
+                self.values[1] = stepSensor.getCurrent() || 0
                 self._draw()
             })
         } catch (e) { }
 
         // ── Calories ──
         try {
-            var calSensor = hmSensor.createSensor(hmSensor.id.CALORIE)
-            self.values[2] = calSensor.current || 0
-            calSensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.values[2] = calSensor.current || 0
+            var calSensor = new Calorie()
+            self.values[2] = calSensor.getCurrent() || 0
+            calSensor.onChange(function () {
+                self.values[2] = calSensor.getCurrent() || 0
                 self._draw()
             })
         } catch (e) { }
 
         // ── Distance (meters → km) ──
         try {
-            var distSensor = hmSensor.createSensor(hmSensor.id.DISTANCE)
-            self.values[3] = (distSensor.current || 0) / 1000
-            distSensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.values[3] = (distSensor.current || 0) / 1000
+            var distSensor = new Distance()
+            self.values[3] = (distSensor.getCurrent() || 0) / 1000
+            distSensor.onChange(function () {
+                self.values[3] = (distSensor.getCurrent() || 0) / 1000
                 self._draw()
             })
         } catch (e) { }
 
         // ── Stress ──
         try {
-            var stressSensor = hmSensor.createSensor(hmSensor.id.STRESS)
-            self.values[4] = stressSensor.stress || stressSensor.current || 0
-            stressSensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.values[4] = stressSensor.stress || stressSensor.current || 0
+            var stressSensor = new Stress()
+            self.values[4] = stressSensor.getCurrent() || 0
+            stressSensor.onChange(function () {
+                self.values[4] = stressSensor.getCurrent() || 0
                 self._draw()
             })
         } catch (e) { }
 
         // ── SpO2 ──
         try {
-            var spo2Sensor = hmSensor.createSensor(hmSensor.id.SPO2)
-            self.values[5] = spo2Sensor.current || 0
-            spo2Sensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.values[5] = spo2Sensor.current || 0
+            var spo2Sensor = new BloodOxygen()
+            self.values[5] = (spo2Sensor.getCurrent() && spo2Sensor.getCurrent().value) || 0
+            spo2Sensor.onChange(function () {
+                self.values[5] = (spo2Sensor.getCurrent() && spo2Sensor.getCurrent().value) || 0
                 self._draw()
             })
         } catch (e) { }
 
         // ── Battery ──
         try {
-            var battSensor = hmSensor.createSensor(hmSensor.id.BATTERY)
-            self.batt = battSensor.current || 100
-            battSensor.addEventListener(hmSensor.event.CHANGE, function () {
-                self.batt = battSensor.current || 100
+            var battSensor = new Battery()
+            self.batt = battSensor.getCurrent() || 100
+            battSensor.onChange(function () {
+                self.batt = battSensor.getCurrent() || 100
                 self._draw()
             })
         } catch (e) { }
     },
 
     _updateTime: function (t) {
-        this.hour = t.hour || 0
-        this.minute = t.minute || 0
-        this.day = t.day || 1
-        this.month = t.month || 1
-        this.weekDay = t.weekDay || 0
+        this.hour = t.getHours() || 0
+        this.minute = t.getMinutes() || 0
+        this.day = t.getDate() || 1
+        this.month = t.getMonth() || 1
+        this.weekDay = (t.getDay() % 7) || 0
     },
 
     // ── Drawing ──────────────────────────────────────────────────────────────────
