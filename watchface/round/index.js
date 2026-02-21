@@ -327,12 +327,12 @@ WatchFace({
 
         // Top Centered Date
         cv.setPaint({ color: COLOR_DATE, font_size: 22 })
-        cv.drawText({ x: CX - centerOffsetX(dateStr, 12), y: 35, w: dateStr.length * 15, h: 30, text: dateStr })
+        cv.drawText({ x: CX - centerOffsetX(dateStr, 12), y: 35, w: 200, h: 50, text: dateStr })
 
         // Vertically Stacked Time on the Right Margin
-        cv.setPaint({ color: COLOR_TIME, font_size: 86 })
-        cv.drawText({ x: 350, y: 160, w: 110, h: 90, text: hStr })
-        cv.drawText({ x: 350, y: 235, w: 110, h: 90, text: mStr })
+        cv.setPaint({ color: COLOR_TIME, font_size: 96 })
+        cv.drawText({ x: 330, y: 155, w: 150, h: 120, text: hStr })
+        cv.drawText({ x: 330, y: 225, w: 150, h: 120, text: mStr })
     },
 
     _drawBattery: function (cv) {
@@ -340,14 +340,14 @@ WatchFace({
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
 
         // Compact Bottom Bar Layout (Higher)
-        var barX = 188, barY = 398, barW = 90, barH = 12
+        var barX = 188, barY = 385, barW = 90, barH = 12
         cv.setPaint({ color: 0x1E2040 })
         cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
         cv.setPaint({ color: col })
         cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH, color: col })
 
-        cv.setPaint({ color: COLOR_VALUE, font_size: 18 })
-        cv.drawText({ x: 215, y: 416, w: 80, h: 25, text: b + '%' })
+        cv.setPaint({ color: COLOR_VALUE, font_size: 20 })
+        cv.drawText({ x: 215, y: 405, w: 100, h: 40, text: b + '%' })
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
