@@ -209,6 +209,7 @@ WatchFace({
         this.minute = t.getMinutes() || 0
         this.day = t.getDate() || 1
         this.month = t.getMonth() || 1
+        this.year = t.getFullYear() || 2026
         this.weekDay = (t.getDay() % 7) || 0
     },
 
@@ -319,14 +320,19 @@ WatchFace({
     _drawTime: function (cv) {
         var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
         var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
-        cv.setPaint({ color: COLOR_TIME, font_size: 64 })
-        cv.drawText({ x: 135, y: 30, w: 320, text: hStr + ':' + mStr })
 
-        var DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-        var MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-        var dateStr = DAYS[this.weekDay] + ' ' + this.day + ' ' + MONTHS[this.month - 1]
-        cv.setPaint({ color: COLOR_DATE, font_size: 20 })
-        cv.drawText({ x: 155, y: 95, w: 220, text: dateStr })
+        var dStr = this.day < 10 ? '0' + this.day : String(this.day)
+        var moStr = this.month < 10 ? '0' + this.month : String(this.month)
+        var dateStr = dStr + '.' + moStr + '.' + this.year
+
+        // Top Centered Date
+        cv.setPaint({ color: COLOR_DATE, font_size: 26 })
+        cv.drawText({ x: 153, y: 35, w: 160, text: dateStr }) // Manually centered based on 10 chars at font 26
+
+        // Vertically Stacked Time on the Right Margin
+        cv.setPaint({ color: COLOR_TIME, font_size: 72 })
+        cv.drawText({ x: 360, y: 170, w: 90, text: hStr })
+        cv.drawText({ x: 360, y: 245, w: 90, text: mStr })
     },
 
     _drawBattery: function (cv) {
