@@ -21,19 +21,18 @@ var R = 120   // max radar radius (px) (shrunk to fit icons)
 var RINGS = 5     // concentric rings
 
 // Color palette
-var COLOR_BG = 0x0000FF
-var COLOR_BG_BAND = 0x0D1020
-var COLOR_GRID_OUTER = 0x383870
-var COLOR_GRID_INNER = 0x1A1D3A
-var COLOR_AXIS = 0x252850
-var COLOR_FILL = 0x082030
-var COLOR_FILL2 = 0x0A2A40
-var COLOR_STROKE = 0x00D4FF
-var COLOR_ACCENT = 0x30BCD5
-var COLOR_TIME = 0xFFFFFF
-var COLOR_DATE = 0x6677AA
-var COLOR_VALUE = 0xBBCCDD
-var COLOR_BATT_OK = 0x2ED573
+var COLOR_BG = 0x070707
+var COLOR_GRID_OUTER = 0x50576A
+var COLOR_GRID_INNER = 0x2A2E3D
+var COLOR_AXIS = 0x2A2E3D
+var COLOR_FILL = 0x08A8C8 // Translucent Neon Blue (simulated on opaque target)
+var COLOR_FILL2 = 0x12D4FA
+var COLOR_STROKE = 0x3CF7FF // Bright stroke
+var COLOR_ACCENT = 0x3CF7FF
+var COLOR_TIME = 0x3CF7FF
+var COLOR_DATE = 0x3CF7FF
+var COLOR_VALUE = 0xFFFFFF
+var COLOR_BATT_OK = 0x39FF14 // Neon Green
 var COLOR_BATT_WARN = 0xFFA502
 var COLOR_BATT_LOW = 0xFF4757
 
@@ -106,14 +105,14 @@ WatchFace({
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
 
-            var labelR = R + 40
-            if (i === 1 || i === 4) labelR += 10
+            // Icons moved outside the vertices slightly
+            var labelR = R + 25
             var lx = polarX(labelR, angle)
             var ly = polarY(labelR, angle)
 
             ui.createWidget(ui.widget.IMG, {
                 x: lx - 16,
-                y: ly - 26,
+                y: ly - 16,
                 src: METRICS[i].icon
             })
         }
@@ -231,12 +230,6 @@ WatchFace({
         if (cv.clear) { cv.clear({ x: 0, y: 0, w: W, h: H }) }
         cv.setPaint({ color: COLOR_BG })
         cv.drawRect({ x: 0, y: 0, w: W, h: H, color: COLOR_BG })
-        cv.setPaint({ color: COLOR_BG_BAND })
-        cv.drawRect({ x: 0, y: 0, w: W, h: 115, color: COLOR_BG_BAND })
-        cv.drawRect({ x: 0, y: 400, w: W, h: H - 400, color: COLOR_BG_BAND })
-        cv.setPaint({ color: 0x1A1D3A, line_width: 1 })
-        cv.drawLine({ x1: 30, y1: 115, x2: W - 30, y2: 115 })
-        cv.drawLine({ x1: 30, y1: 400, x2: W - 30, y2: 400 })
     },
 
     _drawGrid: function (cv) {
@@ -300,19 +293,16 @@ WatchFace({
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
 
-            // Nudge text outward based on angle to avoid overlapping the chart
-            var labelR = R + 40
-            if (i === 1 || i === 4) labelR += 10
+            // Nudge value string INWARD from the vertex
+            var labelR = R - 25
             var lx = polarX(labelR, angle)
             var ly = polarY(labelR, angle)
 
-            // The IMG icon widget occupies the primary space at ly - 26
-            // We draw only the value text positioned directly under the icon
             var valStr = this._formatValue(i)
             cv.setPaint({ color: COLOR_VALUE, font_size: 16 })
             cv.drawText({
                 x: lx - centerOffsetX(valStr, 9),
-                y: ly + 8,
+                y: ly - 10,
                 w: valStr.length * 15, h: 30,
                 text: valStr
             })
@@ -329,27 +319,29 @@ WatchFace({
     _drawTime: function (cv) {
         var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
         var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
-        cv.setPaint({ color: COLOR_TIME, font_size: 58 })
-        cv.drawText({ x: 145, y: 35, w: 320, text: hStr + ':' + mStr })
+        cv.setPaint({ color: COLOR_TIME, font_size: 64 })
+        cv.drawText({ x: 135, y: 30, w: 320, text: hStr + ':' + mStr })
 
-        var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        var dateStr = DAYS[this.weekDay] + '  ' + this.day + ' ' + MONTHS[this.month - 1]
-        cv.setPaint({ color: COLOR_DATE, font_size: 18 })
-        cv.drawText({ x: 160, y: 92, w: 220, text: dateStr })
+        var DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+        var MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+        var dateStr = DAYS[this.weekDay] + ' ' + this.day + ' ' + MONTHS[this.month - 1]
+        cv.setPaint({ color: COLOR_DATE, font_size: 20 })
+        cv.drawText({ x: 155, y: 95, w: 220, text: dateStr })
     },
 
     _drawBattery: function (cv) {
         var b = this.batt
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
-        cv.setPaint({ color: col, font_size: 16 })
-        cv.drawText({ x: 165, y: 410, w: 200, text: 'BATTERY  ' + b + '%' })
 
-        var barX = 153, barY = 432, barW = 160, barH = 6
+        // Compact Bottom Bar Layout
+        var barX = 188, barY = 405, barW = 90, barH = 12
         cv.setPaint({ color: 0x1E2040 })
         cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
         cv.setPaint({ color: col })
         cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH, color: col })
+
+        cv.setPaint({ color: COLOR_VALUE, font_size: 18 })
+        cv.drawText({ x: 215, y: 425, w: 80, text: b + '%' })
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
