@@ -1,0 +1,13 @@
+{
+    "name": "spiderweb-watchface",
+    "version": "1.0.0",
+    "description": "Spider web radar health metrics watchface for Amazfit Bip 6",
+    "scripts": {
+        "dev": "zeus dev",
+        "build": "zeus build",
+        "preview": "zeus preview"
+    },
+    "zepp": {
+        "appType": "watchface"
+    }
+}
