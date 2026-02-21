@@ -8,7 +8,7 @@
             "code": 1,
             "name": "1.0.0"
         },
-        "icon": "assets/icon.png",
+        "icon": "icon.png",
         "vender": "Custom",
         "description": "Spider web radar chart health metrics watchface for Amazfit Bip 6"
     },
