@@ -227,6 +227,9 @@ WatchFace({
                 var a = axisAngle(i)
                 pts.push({ x: polarX(r, a), y: polarY(r, a) })
             }
+            // Explicitly close the polygon for ZeppOS 2.0
+            pts.push({ x: pts[0].x, y: pts[0].y })
+
             cv.setPaint({ color: ring === RINGS ? COLOR_GRID_OUTER : COLOR_GRID_INNER, line_width: ring === RINGS ? 2 : 1 })
             cv.strokePoly({ data_array: pts })
         }
@@ -252,15 +255,18 @@ WatchFace({
             var a = axisAngle(i)
             pts.push({ x: polarX(r, a), y: polarY(r, a) })
         }
+
+        // Explicitly close the stroke loop
+        var closedPts = pts.concat([{ x: pts[0].x, y: pts[0].y }])
         // Fill
         cv.setPaint({ color: COLOR_FILL })
         cv.drawPoly({ data_array: pts, color: COLOR_FILL, drawFill: true })
         // Glow stroke
         cv.setPaint({ color: COLOR_FILL2, line_width: 3 })
-        cv.strokePoly({ data_array: pts, color: COLOR_FILL2 })
+        cv.strokePoly({ data_array: closedPts, color: COLOR_FILL2 })
         // Neon cyan main stroke
         cv.setPaint({ color: COLOR_STROKE, line_width: 2 })
-        cv.strokePoly({ data_array: pts, color: COLOR_STROKE })
+        cv.strokePoly({ data_array: closedPts, color: COLOR_STROKE })
         // Vertex dots
         for (var j = 0; j < N; j++) {
             cv.setPaint({ color: METRICS[j].color })
@@ -273,19 +279,43 @@ WatchFace({
     _drawLabels: function (cv) {
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
-            var labelR = R + 26
+
+            // Convert angle to degrees for display, text rotation in ZeppOS aligns with canvas axes
+            var deg = (angle * 180 / Math.PI) + 90
+
+            // Nudge text outward based on angle to avoid overlapping the chart
+            var labelR = R + 40
+            if (i === 1 || i === 4) labelR += 10
             var lx = polarX(labelR, angle)
             var ly = polarY(labelR, angle)
 
-            // Metric name
-            var label = METRICS[i].label
-            cv.setPaint({ color: METRICS[i].color, font_size: 15 })
-            cv.drawText({ x: lx - centerOffsetX(label, 8), y: ly - 8, w: label.length * 11, text: label })
+            // Adjust rendering bounds
+            var w = 80
+            var h = 30
 
-            // Current value
+            var label = METRICS[i].label
+            cv.setPaint({ color: METRICS[i].color, font_size: 14 })
+            cv.drawText({
+                x: lx - (w / 2),
+                y: ly - (h / 2) - 10,
+                w: w, h: h,
+                text: label,
+                angle: deg,
+                align_h: hmUI.align.CENTER_H,
+                align_v: hmUI.align.CENTER_V
+            })
+
             var valStr = this._formatValue(i)
-            cv.setPaint({ color: COLOR_VALUE, font_size: 13 })
-            cv.drawText({ x: lx - centerOffsetX(valStr, 6.5), y: ly + 10, w: valStr.length * 10, text: valStr })
+            cv.setPaint({ color: COLOR_VALUE, font_size: 14 })
+            cv.drawText({
+                x: lx - (w / 2),
+                y: ly - (h / 2) + 10,
+                w: w, h: h,
+                text: valStr,
+                angle: deg,
+                align_h: hmUI.align.CENTER_H,
+                align_v: hmUI.align.CENTER_V
+            })
         }
     },
 
