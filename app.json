@@ -34,7 +34,9 @@
             },
             "platforms": [
                 {
-                    "st": "r"
+                    "name": "amazfit-bip-6",
+                    "deviceSource": "0x08010100",
+                    "shape": "rect"
                 }
             ],
             "designWidth": 390
