@@ -41,12 +41,12 @@ var COLOR_BATT_LOW = 0xFF4757
 // Axis 0=Top(HR) 1=Top-Right(Steps) 2=Bot-Right(Cal)
 // Axis 3=Bot(Dist) 4=Bot-Left(Stress) 5=Top-Left(SpO2)
 var METRICS = [
-    { label: 'HEART', max: 200, color: 0xFF4757 },
-    { label: 'STEPS', max: 10000, color: 0xFFA502 },
-    { label: 'CAL', max: 1000, color: 0xFF6348 },
-    { label: 'DIST', max: 8, color: 0x2ED573 },  // km
-    { label: 'STRESS', max: 100, color: 0xECCC68 },
-    { label: 'SPO2', max: 100, color: 0x5352ED },
+    { label: 'HEART', max: 200, color: 0xFF4757, icon: 'heart.png' },
+    { label: 'STEPS', max: 10000, color: 0xFFA502, icon: 'steps.png' },
+    { label: 'CAL', max: 1000, color: 0xFF6348, icon: 'cal.png' },
+    { label: 'DIST', max: 8, color: 0x2ED573, icon: 'dist.png' },  // km
+    { label: 'STRESS', max: 100, color: 0xECCC68, icon: 'stress.png' },
+    { label: 'SPO2', max: 100, color: 0x5352ED, icon: 'spo2.png' },
 ]
 
 var N = METRICS.length
@@ -87,6 +87,7 @@ WatchFace({
         this.weekDay = 0
 
         this._createCanvas()
+        this._createIcons()
         this._initSensors()
         this._draw()
     },
@@ -97,6 +98,25 @@ WatchFace({
         this.cv = ui.createWidget(ui.widget.CANVAS, {
             x: 0, y: 0, w: W, h: H
         })
+    },
+
+    // ── Static Icons ─────────────────────────────────────────────────────────────
+
+    _createIcons: function () {
+        for (var i = 0; i < N; i++) {
+            var angle = axisAngle(i)
+
+            var labelR = R + 40
+            if (i === 1 || i === 4) labelR += 10
+            var lx = polarX(labelR, angle)
+            var ly = polarY(labelR, angle)
+
+            ui.createWidget(ui.widget.IMG, {
+                x: lx - 16,
+                y: ly - 26,
+                src: METRICS[i].icon
+            })
+        }
     },
 
     // ── Sensors ──────────────────────────────────────────────────────────────────
@@ -280,33 +300,19 @@ WatchFace({
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
 
-            // Convert angle to degrees for display, text rotation in ZeppOS aligns with canvas axes
-            var deg = (angle * 180 / Math.PI) + 90
-
             // Nudge text outward based on angle to avoid overlapping the chart
             var labelR = R + 40
             if (i === 1 || i === 4) labelR += 10
             var lx = polarX(labelR, angle)
             var ly = polarY(labelR, angle)
 
-            // Adjust rendering bounds
-            var w = 80
-            var h = 30
-
-            var label = METRICS[i].label
-            cv.setPaint({ color: METRICS[i].color, font_size: 15 })
-            cv.drawText({
-                x: lx - centerOffsetX(label, 9),
-                y: ly - 16,
-                w: label.length * 15, h: 30,
-                text: label
-            })
-
+            // The IMG icon widget occupies the primary space at ly - 26
+            // We draw only the value text positioned directly under the icon
             var valStr = this._formatValue(i)
-            cv.setPaint({ color: COLOR_VALUE, font_size: 14 })
+            cv.setPaint({ color: COLOR_VALUE, font_size: 16 })
             cv.drawText({
-                x: lx - centerOffsetX(valStr, 8.5),
-                y: ly + 4,
+                x: lx - centerOffsetX(valStr, 9),
+                y: ly + 8,
                 w: valStr.length * 15, h: 30,
                 text: valStr
             })
