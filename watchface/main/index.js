@@ -11,13 +11,13 @@ import { Time, HeartRate, Step, Calorie, Distance, Stress, BloodOxygen, Battery 
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-var W = 466   // screen width
-var H = 466   // screen height
+var W = 390   // screen width
+var H = 450   // screen height
 
 // Radar chart geometry
-var CX = 233   // center X
-var CY = 240   // center y (moved up slightly)
-var R = 120   // max radar radius (px) (shrunk to fit icons)
+var CX = 170   // center X
+var CY = 225   // center y (moved up slightly)
+var R = 95   // max radar radius (px) (shrunk to fit icons)
 var RINGS = 5     // concentric rings
 
 // Color palette
@@ -328,12 +328,12 @@ WatchFace({
         // Top Centered Date
         cv.setPaint({ color: COLOR_DATE, font_size: 20 })
         // A character is ~10px at font size 20, 10 chars = 100px. Offset = 50.
-        cv.drawText({ x: CX - 50, y: 40, w: 120, h: 40, text: dateStr })
+        cv.drawText({ x: 145, y: 30, w: 120, h: 40, text: dateStr })
 
         // Vertically Stacked Time on the Right Margin
         cv.setPaint({ color: COLOR_TIME, font_size: 78 })
-        cv.drawText({ x: 365, y: 155, w: 100, h: 90, text: hStr })
-        cv.drawText({ x: 365, y: 220, w: 100, h: 90, text: mStr })
+        cv.drawText({ x: 300, y: 155, w: 100, h: 90, text: hStr })
+        cv.drawText({ x: 300, y: 220, w: 100, h: 90, text: mStr })
     },
 
     _drawBattery: function (cv) {
@@ -341,14 +341,14 @@ WatchFace({
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
 
         // Compact Bottom Bar Layout (Higher)
-        var barX = 188, barY = 385, barW = 90, barH = 12
+        var barX = 150, barY = 400, barW = 90, barH = 12
         cv.setPaint({ color: 0x1E2040 })
         cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
         cv.setPaint({ color: col })
         cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH, color: col })
 
         cv.setPaint({ color: COLOR_VALUE, font_size: 20 })
-        cv.drawText({ x: 215, y: 405, w: 100, h: 40, text: b + '%' })
+        cv.drawText({ x: 177, y: 420, w: 100, h: 40, text: b + '%' })
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────

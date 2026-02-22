@@ -9,5 +9,9 @@
     },
     "zepp": {
         "appType": "watchface"
+    },
+    "devDependencies": {
+        "@zeppos/zeus-cli": "^1.8.2",
+        "zeppos-app-utils": "^1.0.0"
     }
 }

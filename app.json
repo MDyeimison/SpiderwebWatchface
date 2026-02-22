@@ -24,10 +24,10 @@
     },
     "permissions": [],
     "targets": {
-        "gtr-4": {
+        "bip-6": {
             "module": {
                 "watchface": {
-                    "path": "watchface/gtr-4/index",
+                    "path": "watchface/bip-6/index",
                     "main": 1,
                     "editable": 1,
                     "lockscreen": 1
@@ -38,7 +38,7 @@
                     "st": "r"
                 }
             ],
-            "designWidth": 466
+            "designWidth": 390
         }
     },
     "i18n": {
