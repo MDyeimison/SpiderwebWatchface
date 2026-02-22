@@ -22,7 +22,14 @@
             "minVersion": "2.0"
         }
     },
-    "permissions": [],
+    "permissions": [
+        "data:user.hd.heart_rate",
+        "data:user.hd.step",
+        "data:user.hd.calorie",
+        "data:user.hd.distance",
+        "data:user.hd.stress",
+        "data:user.hd.spo2"
+    ],
     "targets": {
         "bip-6": {
             "module": {
