@@ -15,23 +15,23 @@ var W = 390   // screen width
 var H = 450   // screen height
 
 // Radar chart geometry
-var CX = 170   // center X
-var CY = 225   // center y (moved up slightly)
-var R = 95   // max radar radius (px) (shrunk to fit icons)
+var CX = 183   // center X (shifted right to keep left icons on-screen)
+var CY = 235   // center Y (moved down to keep top icon clear of header bars)
+var R = 115    // max radar radius (bigger chart)
 var RINGS = 5     // concentric rings
 
 // Color palette
 var COLOR_BG = 0x070707
-var COLOR_GRID_OUTER = 0x50576A
-var COLOR_GRID_INNER = 0x2A2E3D
-var COLOR_AXIS = 0x2A2E3D
-var COLOR_FILL = 0x08A8C8 // Translucent Neon Blue (simulated on opaque target)
-var COLOR_FILL2 = 0x12D4FA
-var COLOR_STROKE = 0x3CF7FF // Bright stroke
-var COLOR_ACCENT = 0x3CF7FF
-var COLOR_TIME = 0x3CF7FF
-var COLOR_DATE = 0x3CF7FF
-var COLOR_VALUE = 0xFFFFFF
+var COLOR_GRID_OUTER = 0x39FF14  // Bright neon green outer ring
+var COLOR_GRID_INNER = 0x1A5C0A  // Dark forest green inner rings
+var COLOR_AXIS = 0x2D7A1A        // Medium green axes
+var COLOR_FILL = 0x0D3B0A        // Very dark green data fill
+var COLOR_FILL2 = 0x2ED573       // Bright emerald green for inner fill
+var COLOR_STROKE = 0x5AFB67      // Bright green data polygon stroke
+var COLOR_ACCENT = 0x5AFB67      // Accent green
+var COLOR_TIME = 0x5AFB67
+var COLOR_DATE = 0x5AFB67
+var COLOR_VALUE = 0x5AFB67
 var COLOR_BATT_OK = 0x39FF14 // Neon Green
 var COLOR_BATT_WARN = 0xFFA502
 var COLOR_BATT_LOW = 0xFF4757
@@ -85,10 +85,47 @@ WatchFace({
         this.month = 1
         this.weekDay = 0
 
+        this._createBackground()
         this._createCanvas()
+        this._createTextWidgets() // TEXT widgets above canvas, below icons
         this._createIcons()
         this._initSensors()
         this._draw()
+        this._startAnimation()
+    },
+
+    // ── Background Image ──────────────────────────────────────────────────────────
+
+    _createBackground: function () {
+        ui.createWidget(ui.widget.IMG, {
+            src: 'background.png',
+            x: 0,
+            y: 0
+        })
+    },
+
+    // ── Animation (cycled IMG widget on top of canvas) ────────────────────────────────
+
+    _startAnimation: function () {
+        var self = this
+        var frame = 0
+        var totalFrames = 18
+
+        // Create IMG widget LAST so it is on top of the canvas in Z-order
+        // Frames: 75x107, right-side empty space (x=300, mid-height y=195)
+        this.animImg = ui.createWidget(ui.widget.IMG, {
+            src: 'walking_guy/walking_0.png',
+            x: 300,
+            y: 200
+        })
+
+        // Cycle frames at ~12 fps (every 83ms) via setInterval
+        this.animTimer = setInterval(function () {
+            frame = (frame + 1) % totalFrames
+            if (self.animImg) {
+                self.animImg.setProperty(ui.prop.SRC, 'walking_guy/walking_' + frame + '.png')
+            }
+        }, 83)
     },
 
     // ── Canvas ───────────────────────────────────────────────────────────────────
@@ -99,20 +136,62 @@ WatchFace({
         })
     },
 
-    // ── Static Icons ─────────────────────────────────────────────────────────────
+    // ── TEXT widgets for all dynamic labels ─────────────────────────────────
 
-    _createIcons: function () {
+    _createTextWidgets: function () {
+        var ICON_R = R + 20, ICON_HALF = 21
+        this.labelWidgets = []
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
+            var ix = polarX(ICON_R, angle)
+            var iy = polarY(ICON_R, angle)
+            var x, y
+            if (i === 0 || i === 3) {
+                x = ix + ICON_HALF + 4; y = iy - 28
+            } else {
+                var xOff = (i === 4 || i === 5) ? -15 : 0
+                x = ix - 20 + xOff; y = iy + ICON_HALF - 13
+            }
 
-            // Icons moved outside the vertices slightly
-            var labelR = R + 25
-            var lx = polarX(labelR, angle)
-            var ly = polarY(labelR, angle)
+            // Push the counter down by 7 pixels
+            y += 7
 
+            this.labelWidgets.push(ui.createWidget(ui.widget.TEXT, {
+                x: x, y: y, w: 70, h: 22,
+                text: '0', text_size: 16, color: COLOR_VALUE
+            }))
+        }
+
+        // Time widget (left half of bottom bar) - pushed down from 368 to 375
+        this.timeWidget = ui.createWidget(ui.widget.TEXT, {
+            x: Math.floor(W / 4 - 35), y: 375, w: 90, h: 35,
+            text: '00:00', text_size: 22, color: 0x5AFB67
+        })
+
+        // Date widget (right half of bottom bar) - pushed down from 368 to 375
+        this.dateWidget = ui.createWidget(ui.widget.TEXT, {
+            x: Math.floor(3 * W / 4 - 60) - 20, y: 375, w: 140, h: 35,
+            text: '01.01.2026', text_size: 22, color: 0x5AFB67
+        })
+
+        // Battery % widget - pushed down from 408 to 415
+        this.battWidget = ui.createWidget(ui.widget.TEXT, {
+            x: 22, y: 415, w: 60, h: 25,
+            text: '100%', text_size: 20, color: 0x5AFB67
+        })
+    },
+
+    // ── Static Icons ─────────────────────────────────────────
+
+    _createIcons: function () {
+        var ICON_R = R + 20
+        for (var i = 0; i < N; i++) {
+            var angle = axisAngle(i)
+            var lx = polarX(ICON_R, angle)
+            var ly = polarY(ICON_R, angle)
             ui.createWidget(ui.widget.IMG, {
-                x: lx - 16,
-                y: ly - 16,
+                x: lx - 21,
+                y: ly - 21,
                 src: METRICS[i].icon
             })
         }
@@ -222,15 +301,36 @@ WatchFace({
         this._drawGrid(cv)
         this._drawAxes(cv)
         this._drawDataPolygon(cv)
-        this._drawLabels(cv)
-        this._drawTime(cv)
         this._drawBattery(cv)
+        this._updateTextWidgets()
+    },
+
+    _updateTextWidgets: function () {
+        // Metric value labels
+        for (var i = 0; i < N; i++) {
+            if (this.labelWidgets && this.labelWidgets[i]) {
+                this.labelWidgets[i].setProperty(ui.prop.MORE, { text: this._formatValue(i) })
+            }
+        }
+        // Time
+        var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
+        var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
+        if (this.timeWidget) this.timeWidget.setProperty(ui.prop.MORE, { text: hStr + ':' + mStr })
+        // Date
+        var dStr = this.day < 10 ? '0' + this.day : String(this.day)
+        var moStr = this.month < 10 ? '0' + this.month : String(this.month)
+        if (this.dateWidget) this.dateWidget.setProperty(ui.prop.MORE, { text: dStr + '.' + moStr + '.' + this.year })
+        // Battery %
+        if (this.battWidget) this.battWidget.setProperty(ui.prop.MORE, { text: this.batt + '%' })
     },
 
     _drawBackground: function (cv) {
-        if (cv.clear) { cv.clear({ x: 0, y: 0, w: W, h: H }) }
-        cv.setPaint({ color: COLOR_BG })
-        cv.drawRect({ x: 0, y: 0, w: W, h: H, color: COLOR_BG })
+        // Clear chart interior to prevent ghost fills
+        var bgPts = []
+        for (var bg = 0; bg < N; bg++) {
+            bgPts.push({ x: polarX(R, axisAngle(bg)), y: polarY(R, axisAngle(bg)) })
+        }
+        cv.drawPoly({ data_array: bgPts, color: 0x000000, drawFill: true })
     },
 
     _drawGrid: function (cv) {
@@ -241,11 +341,10 @@ WatchFace({
                 var a = axisAngle(i)
                 pts.push({ x: polarX(r, a), y: polarY(r, a) })
             }
-            // Explicitly close the polygon for ZeppOS 2.0
             pts.push({ x: pts[0].x, y: pts[0].y })
-
-            cv.setPaint({ color: ring === RINGS ? COLOR_GRID_OUTER : COLOR_GRID_INNER, line_width: ring === RINGS ? 2 : 1 })
-            cv.strokePoly({ data_array: pts })
+            var col = ring === RINGS ? COLOR_GRID_OUTER : COLOR_GRID_INNER
+            cv.setPaint({ color: col, line_width: ring === RINGS ? 2 : 1 })
+            cv.strokePoly({ data_array: pts, color: col })
         }
     },
 
@@ -257,7 +356,7 @@ WatchFace({
         }
         cv.setPaint({ color: COLOR_ACCENT })
         cv.drawCircle({ x: CX, y: CY, radius: 4 })
-        cv.setPaint({ color: 0xFFFFFF })
+        cv.setPaint({ color: 0x5AFB67 })
         cv.drawCircle({ x: CX, y: CY, radius: 2 })
     },
 
@@ -270,7 +369,6 @@ WatchFace({
             pts.push({ x: polarX(r, a), y: polarY(r, a) })
         }
 
-        // Explicitly close the stroke loop
         var closedPts = pts.concat([{ x: pts[0].x, y: pts[0].y }])
         // Fill
         cv.setPaint({ color: COLOR_FILL })
@@ -285,71 +383,51 @@ WatchFace({
         for (var j = 0; j < N; j++) {
             cv.setPaint({ color: METRICS[j].color })
             cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 5, color: METRICS[j].color })
-            cv.setPaint({ color: 0xFFFFFF })
-            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 2, color: 0xFFFFFF })
-        }
-    },
-
-    _drawLabels: function (cv) {
-        for (var i = 0; i < N; i++) {
-            var angle = axisAngle(i)
-
-            // Nudge value string INWARD from the vertex
-            var labelR = R - 25
-            var lx = polarX(labelR, angle)
-            var ly = polarY(labelR, angle)
-
-            var valStr = this._formatValue(i)
-            cv.setPaint({ color: COLOR_VALUE, font_size: 16 })
-            cv.drawText({
-                x: lx - centerOffsetX(valStr, 9),
-                y: ly - 10,
-                w: valStr.length * 15, h: 30,
-                text: valStr
-            })
+            cv.setPaint({ color: 0x5AFB67 })
+            cv.drawCircle({ x: pts[j].x, y: pts[j].y, radius: 2, color: 0x5AFB67 })
         }
     },
 
     _formatValue: function (i) {
         var v = this.values[i]
-        if (i === 3) return (v).toFixed(1) + 'km'
-        if (i === 5) return Math.round(v) + '%'
-        return String(Math.round(v))
-    },
-
-    _drawTime: function (cv) {
-        var hStr = this.hour < 10 ? '0' + this.hour : String(this.hour)
-        var mStr = this.minute < 10 ? '0' + this.minute : String(this.minute)
-
-        var dStr = this.day < 10 ? '0' + this.day : String(this.day)
-        var moStr = this.month < 10 ? '0' + this.month : String(this.month)
-        var dateStr = dStr + '.' + moStr + '.' + this.year
-
-        // Top Centered Date (Width 390, char string ~100px)
-        // Set X to 145 (since 390/2 - 50 = 145) to perfectly center.
-        cv.setPaint({ color: COLOR_DATE, font_size: 20 })
-        cv.drawText({ x: 145, y: 30, w: 120, h: 40, text: dateStr })
-
-        // Vertically Stacked Time on the Right Margin
-        cv.setPaint({ color: COLOR_TIME, font_size: 78 })
-        cv.drawText({ x: 300, y: 155, w: 100, h: 90, text: hStr })
-        cv.drawText({ x: 300, y: 220, w: 100, h: 90, text: mStr })
+        if (v === undefined || v === null || isNaN(v)) v = 0
+        if (i === 3) return (Number(v)).toFixed(1) + 'km'
+        if (i === 5) return Math.round(Number(v)) + '%'
+        return String(Math.round(Number(v)))
     },
 
     _drawBattery: function (cv) {
         var b = this.batt
-        var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
+        // Bar only — % text handled by battWidget TEXT widget
+        // Shorter bar: starts at x=80, ends at x=W-50=340
+        var pad = 3
+        var barX = 90, barW = W - 130, barY = 425, barH = 14
+        var outerX = barX - pad, outerY = barY - pad
+        var outerW = barW + pad * 2, outerH = barH + pad * 2
+        var fillW = Math.round((b / 100) * barW)
 
-        // Compact Bottom Bar Layout (Moved Much Higher)
-        var barX = 150, barY = 360, barW = 90, barH = 12
-        cv.setPaint({ color: 0x1E2040 })
-        cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
-        cv.setPaint({ color: col })
-        cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH, color: col })
+        // Outer bright green border
+        cv.setPaint({ color: 0x39FF14, line_width: 2 })
+        cv.strokePoly({
+            data_array: [
+                { x: outerX, y: outerY },
+                { x: outerX + outerW, y: outerY },
+                { x: outerX + outerW, y: outerY + outerH },
+                { x: outerX, y: outerY + outerH },
+                { x: outerX, y: outerY }
+            ],
+            color: 0x39FF14
+        })
 
-        cv.setPaint({ color: COLOR_VALUE, font_size: 20 })
-        cv.drawText({ x: 177, y: 380, w: 100, h: 40, text: b + '%' })
+        // Inner background (empty area) — #45711C
+        cv.setPaint({ color: 0x45711C })
+        cv.drawPoly({ data_array: [{ x: barX, y: barY }, { x: barX + barW, y: barY }, { x: barX + barW, y: barY + barH }, { x: barX, y: barY + barH }], color: 0x45711C, drawFill: true })
 
+        // Neon green fill proportional to battery %
+        if (fillW > 0) {
+            cv.setPaint({ color: 0x39FF14 })
+            cv.drawPoly({ data_array: [{ x: barX, y: barY }, { x: barX + fillW, y: barY }, { x: barX + fillW, y: barY + barH }, { x: barX, y: barY + barH }], color: 0x39FF14, drawFill: true })
+        }
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
@@ -358,5 +436,7 @@ WatchFace({
         this._draw()
     },
 
-    onDestroy: function () { }
+    onDestroy: function () {
+        if (this.animTimer) { clearInterval(this.animTimer) }
+    }
 })
