@@ -28,14 +28,14 @@ The spider web chart expands from the center (0%) to the outer glowing ring (100
 Before beginning, ensure you have **Node.js** and **npm** installed on your system.
 This project uses the official Zeus CLI for Zepp OS development.
 
-\`\`\`bash
+```bash
 # 1. Clone the repository
 git clone https://github.com/your-username/SpiderwebWatchface.git
 cd SpiderwebWatchface
 
 # 2. Install dependencies (Zeus CLI core)
 npm install
-\`\`\`
+```
 
 ## Running & Installing on the Watch
 
