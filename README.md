@@ -45,23 +45,23 @@ You can enable this by tapping your profile icon in the Zepp app repeatedly. Mak
 
 ### 2. Login
 Link your computer's CLI to your Zepp developer account:
-\`\`\`bash
+\\\bash
 npx @zeppos/zeus-cli login
-\`\`\`
+\\\
 
 ### 3. Connect the Simulator / Device
 You can preview the watchface either on an emulated watch on your desktop or directly on your wrist!
 
 **Start the Zepp Emulator (Optional):**
-\`\`\`bash
+\\\bash
 npx @zeppos/zeus-cli dev
-\`\`\`
+\\\
 
 **Connect via QR Code (Physical Install):**
 Start the build bridge service. It will generate a QR code in the terminal.
-\`\`\`bash
+\\\bash
 npx @zeppos/zeus-cli preview
-\`\`\`
+\\\
 1. Open the Zepp App on your smartphone.
 2. Navigate to your Profile > Select your Watch > Developer Mode.
 3. Tap "Scan" and point your phone camera at the QR code string in your terminal. 
@@ -69,9 +69,9 @@ npx @zeppos/zeus-cli preview
 
 ## Building for Production
 If you want to package the watchface into a standalone `.zab` file for manual sideloading or preparing it for submission to the Zepp App Store, run:
-\`\`\`bash
+\\\bash
 npx @zeppos/zeus-cli build
-\`\`\`
+\\\
 The compiled `.zab` bundle will be generated inside the `./dist/` folder.
 
 ## Authors
