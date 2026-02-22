@@ -326,8 +326,9 @@ WatchFace({
         var dateStr = dStr + '.' + moStr + '.' + this.year
 
         // Top Centered Date (Width 390, char string ~100px)
+        // Set X to 145 (since 390/2 - 50 = 145) to perfectly center.
         cv.setPaint({ color: COLOR_DATE, font_size: 20 })
-        cv.drawText({ x: 135, y: 30, w: 120, h: 40, text: dateStr })
+        cv.drawText({ x: 145, y: 30, w: 120, h: 40, text: dateStr })
 
         // Vertically Stacked Time on the Right Margin
         cv.setPaint({ color: COLOR_TIME, font_size: 78 })
@@ -339,15 +340,16 @@ WatchFace({
         var b = this.batt
         var col = b < 20 ? COLOR_BATT_LOW : b < 50 ? COLOR_BATT_WARN : COLOR_BATT_OK
 
-        // Compact Bottom Bar Layout (Moved Higher)
-        var barX = 150, barY = 380, barW = 90, barH = 12
+        // Compact Bottom Bar Layout (Moved Much Higher)
+        var barX = 150, barY = 360, barW = 90, barH = 12
         cv.setPaint({ color: 0x1E2040 })
         cv.drawRect({ x: barX, y: barY, w: barW, h: barH, color: 0x1E2040 })
         cv.setPaint({ color: col })
         cv.drawRect({ x: barX, y: barY, w: Math.round((b / 100) * barW), h: barH, color: col })
 
         cv.setPaint({ color: COLOR_VALUE, font_size: 20 })
-        cv.drawText({ x: 177, y: 400, w: 100, h: 40, text: b + '%' })
+        cv.drawText({ x: 177, y: 380, w: 100, h: 40, text: b + '%' })
+
     },
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
