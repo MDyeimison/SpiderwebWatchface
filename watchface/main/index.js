@@ -96,6 +96,7 @@ WatchFace({
         this.day = 1
         this.month = 1
         this.weekDay = 0
+        this.isScreenOn = true // Track state to save battery during screen off
 
         this._createBackground()
         this._createCanvas()
@@ -259,6 +260,17 @@ WatchFace({
             self._updateTime(timeSensor)
             timeSensor.onPerMinute(function () {
                 self._updateTime(timeSensor)
+
+                // Force-poll Stress and SpO2 because their onChange events are unreliable
+                if (self.stressSensor) {
+                    var st = self.stressSensor.getCurrent()
+                    self.values[4] = (st && st.value !== undefined) ? st.value : 0
+                }
+                if (self.spo2Sensor) {
+                    var sp = self.spo2Sensor.getCurrent()
+                    self.values[5] = (sp && sp.value !== undefined) ? sp.value : 0
+                }
+
                 self._draw()
             })
         } catch (e) { }
@@ -266,11 +278,21 @@ WatchFace({
         // ── Heart Rate ──
         try {
             var hrSensor = new HeartRate()
-            self.values[0] = hrSensor.getLast() || 0
-            hrSensor.onLastChange(function () {
-                self.values[0] = hrSensor.getLast() || 0
-                self._draw()
-            })
+            // Try to get live current HR, fallback to last recorded if unavailable
+            self.values[0] = hrSensor.getCurrent() || hrSensor.getLast() || 0
+
+            // Listen for live continuous updates
+            if (hrSensor.onCurrentChange) {
+                hrSensor.onCurrentChange(function () {
+                    self.values[0] = hrSensor.getCurrent() || 0
+                    self._draw()
+                })
+            } else if (hrSensor.onLastChange) {
+                hrSensor.onLastChange(function () {
+                    self.values[0] = hrSensor.getLast() || 0
+                    self._draw()
+                })
+            }
         } catch (e) { }
 
         // ── Steps ──
@@ -305,11 +327,11 @@ WatchFace({
 
         // ── Stress ──
         try {
-            var stressSensor = new Stress()
-            var st = stressSensor.getCurrent()
+            self.stressSensor = new Stress()
+            var st = self.stressSensor.getCurrent()
             self.values[4] = (st && st.value !== undefined) ? st.value : 0
-            stressSensor.onChange(function () {
-                var newSt = stressSensor.getCurrent()
+            self.stressSensor.onChange(function () {
+                var newSt = self.stressSensor.getCurrent()
                 self.values[4] = (newSt && newSt.value !== undefined) ? newSt.value : 0
                 self._draw()
             })
@@ -317,10 +339,12 @@ WatchFace({
 
         // ── SpO2 ──
         try {
-            var spo2Sensor = new BloodOxygen()
-            self.values[5] = (spo2Sensor.getCurrent() && spo2Sensor.getCurrent().value) || 0
-            spo2Sensor.onChange(function () {
-                self.values[5] = (spo2Sensor.getCurrent() && spo2Sensor.getCurrent().value) || 0
+            self.spo2Sensor = new BloodOxygen()
+            var sp = self.spo2Sensor.getCurrent()
+            self.values[5] = (sp && sp.value !== undefined) ? sp.value : 0
+            self.spo2Sensor.onChange(function () {
+                var newSp = self.spo2Sensor.getCurrent()
+                self.values[5] = (newSp && newSp.value !== undefined) ? newSp.value : 0
                 self._draw()
             })
         } catch (e) { }
@@ -348,6 +372,8 @@ WatchFace({
     // ── Drawing ──────────────────────────────────────────────────────────────────
 
     _draw: function () {
+        if (!this.isScreenOn) return // Do not draw heavy graphics if screen is physically off
+
         var cv = this.cv
         if (!cv) return
         this._drawBackground(cv)
@@ -489,12 +515,14 @@ WatchFace({
     // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
     onResume: function () {
-        this._draw()
+        this.isScreenOn = true // Re-enable drawing
+        this._draw() // Force an immediate redraw to clear stale values generated while sleeping
         // Start walking when screen wakes up
         this._resumeAnimation()
     },
 
     onPause: function () {
+        this.isScreenOn = false // Stop responding to heavy sensor changes
         // Stop walking when screen turns off (Saves your battery!)
         this._pauseAnimation()
     },
