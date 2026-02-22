@@ -2,7 +2,7 @@
 
 ![Watchface Preview](./watchface.png)
 
-A custom, data-rich AMOLED watch face built for Zepp OS (specifically aimed at the **Amazfit Bip 6**). 
+A custom Fallout Pip-Boy inpired, data-rich AMOLED watch face built for Zepp OS (specifically aimed at the **Amazfit Bip 6**). 
 This watch face utilizes a dynamic spider web radar chart to visualize six core health metrics at a glance, allowing you to instantly understand your daily physical performance relative to your goals.
 
 ## Core Features
