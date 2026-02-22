@@ -4,9 +4,9 @@ $outDir1 = "c:\Users\Eysuu\Documents\Projects\SpiderwebWatchface\assets\bip-6\wa
 $outDir2 = "c:\Users\Eysuu\Documents\Projects\SpiderwebWatchface\assets\bip-6.r\walking_guy"
 $gifPath  = "c:\Users\Eysuu\Documents\Projects\SpiderwebWatchface\assets\bip-6\walking_guy.gif"
 
-# Smaller size to fit in bottom-right corner empty space
-$newW = 75
-$newH = 107
+# Smaller size to fit in bottom-right corner empty space (upscaled +25%)
+$newW = 94
+$newH = 134
 
 $img   = [System.Drawing.Image]::FromFile($gifPath)
 $fd    = New-Object System.Drawing.Imaging.FrameDimension($img.FrameDimensionsList[0])

@@ -27,7 +27,7 @@ var W = 390   // screen width
 var H = 450   // screen height
 
 // Radar chart geometry
-var CX = 183   // center X (shifted right to keep left icons on-screen)
+var CX = 168   // center X (shifted left by 15px from 183)
 var CY = 215   // <-- CHANGE THIS FROM 235 TO 225
 var R = 115    // max radar radius (bigger chart)
 var RINGS = 5  // concentric rings
@@ -128,10 +128,10 @@ WatchFace({
         // Back to the standard IMG widget that we know works!
         this.animImg = ui.createWidget(ui.widget.IMG, {
             src: 'walking_guy/walking_0.png',
-            x: 300,
-            y: 200,
-            w: unscale(75),
-            h: unscale(107)
+            x: 300, // Moved 5px right from 300
+            y: 170, // Moved 15px up from 200,
+            w: unscale(94), // Upscaled by 25% (75 -> 94)
+            h: unscale(134) // Upscaled by 25% (107 -> 134)
         })
 
         this._resumeAnimation()
@@ -199,29 +199,34 @@ WatchFace({
 
             this.labelWidgets.push(ui.createWidget(ui.widget.TEXT, {
                 x: x, y: y,
-                w: 70, h: 28,          // <-- Increased height to prevent clipping
+                w: 70, h: 32,          // <-- Increased height to prevent clipping
                 text: '0',
-                text_size: 20,         // <-- Increased font size from 16 to 20
+                text_size: 24,         // <-- Increased font size from 20 to 24
                 color: COLOR_VALUE
             }))
         }
 
         // Time widget (left half of bottom bar)
         this.timeWidget = ui.createWidget(ui.widget.TEXT, {
-            x: Math.floor(W / 4 - 35), y: 375, w: 90, h: 35,
-            text: '00:00', text_size: 22, color: 0x5AFB67
+            x: Math.floor(W / 4 - 35), y: 375, w: 90, h: 40,
+            text: '00:00', text_size: 26, color: 0x5AFB67
         })
 
         // Date widget (right half of bottom bar)
         this.dateWidget = ui.createWidget(ui.widget.TEXT, {
-            x: Math.floor(3 * W / 4 - 60) - 20, y: 375, w: 140, h: 35,
-            text: '01.01.2026', text_size: 22, color: 0x5AFB67
+            x: Math.floor(3 * W / 4 - 60) - 20, y: 375, w: 140, h: 40,
+            text: '01.01.2026', text_size: 26, color: 0x5AFB67
         })
 
         // Battery % widget
         this.battWidget = ui.createWidget(ui.widget.TEXT, {
-            x: 98, y: 415, w: 55, h: 25,  // <-- Moved X inward to 98
-            text: '100%', text_size: 20, color: 0x5AFB67
+            x: 90, y: 412, w: 65, h: 35,  // <-- Increased width/height for larger text
+            text: '100%', text_size: 28, color: 0x5AFB67 // Increased text size from 24 to 28
+        })
+        // Fake bold overlay (shifted 1px right)
+        this.battWidgetBold = ui.createWidget(ui.widget.TEXT, {
+            x: 91, y: 412, w: 65, h: 35,
+            text: '100%', text_size: 28, color: 0x5AFB67
         })
     },
 
@@ -370,6 +375,7 @@ WatchFace({
         if (this.dateWidget) this.dateWidget.setProperty(ui.prop.MORE, { text: dStr + '.' + moStr + '.' + this.year })
         // Battery %
         if (this.battWidget) this.battWidget.setProperty(ui.prop.MORE, { text: this.batt + '%' })
+        if (this.battWidgetBold) this.battWidgetBold.setProperty(ui.prop.MORE, { text: this.batt + '%' })
     },
 
     _drawBackground: function (cv) {
@@ -451,7 +457,7 @@ WatchFace({
 
         var pad = 3
         // Shorter bar, shifted to the right to sit perfectly next to the centered text
-        var barX = 153, barW = 140, barY = 422, barH = 14  // <-- Adjusted X and Width
+        var barX = 153, barW = 140, barY = 425, barH = 14  // <-- Moved down 3px (422 -> 425)
         var outerX = barX - pad, outerY = barY - pad
         var outerW = barW + pad * 2, outerH = barH + pad * 2
         var fillW = Math.round((b / 100) * barW)
