@@ -35,7 +35,16 @@
             },
             "platforms": [
                 {
-                    "st": "r"
+                    "name": "Amazfit Bip 6",
+                    "deviceSource": 9765120
+                },
+                {
+                    "name": "Amazfit Bip 6",
+                    "deviceSource": 9765121
+                },
+                {
+                    "name": "Amazfit Bip 6",
+                    "deviceSource": 10158337
                 }
             ],
             "designWidth": 390
