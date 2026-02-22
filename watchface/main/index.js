@@ -7,7 +7,19 @@
  */
 import ui from '@zos/ui'
 import { Time, HeartRate, Step, Calorie, Distance, Stress, BloodOxygen, Battery } from '@zos/sensor'
+import { getDeviceInfo } from '@zos/device'
 
+var scaleRatio = 1
+try {
+    var deviceInfo = getDeviceInfo()
+    if (deviceInfo && deviceInfo.width) {
+        scaleRatio = 390 / deviceInfo.width
+    }
+} catch (e) { }
+
+function unscale(px) {
+    return Math.round(px * scaleRatio)
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -16,9 +28,9 @@ var H = 450   // screen height
 
 // Radar chart geometry
 var CX = 183   // center X (shifted right to keep left icons on-screen)
-var CY = 235   // center Y (moved down to keep top icon clear of header bars)
+var CY = 215   // <-- CHANGE THIS FROM 235 TO 225
 var R = 115    // max radar radius (bigger chart)
-var RINGS = 5     // concentric rings
+var RINGS = 5  // concentric rings
 
 // Color palette
 var COLOR_BG = 0x070707
@@ -97,10 +109,13 @@ WatchFace({
     // ── Background Image ──────────────────────────────────────────────────────────
 
     _createBackground: function () {
+        // Unscale bounds so the 390x450 physical image isn't cropped inside a smaller bounding box
         ui.createWidget(ui.widget.IMG, {
             src: 'background.png',
             x: 0,
-            y: 0
+            y: 0,
+            w: unscale(390),
+            h: unscale(450)
         })
     },
 
@@ -114,7 +129,9 @@ WatchFace({
         this.animImg = ui.createWidget(ui.widget.IMG, {
             src: 'walking_guy/walking_0.png',
             x: 300,
-            y: 200
+            y: 200,
+            w: unscale(75),
+            h: unscale(107)
         })
 
         this._resumeAnimation()
@@ -155,44 +172,55 @@ WatchFace({
     // ── TEXT widgets for all dynamic labels ─────────────────────────────────
 
     _createTextWidgets: function () {
-        var ICON_R = R + 20, ICON_HALF = 21
+        var ICON_R = R + 25, ICON_HALF = 21
         this.labelWidgets = []
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
             var ix = polarX(ICON_R, angle)
             var iy = polarY(ICON_R, angle)
             var x, y
+
             if (i === 0 || i === 3) {
-                x = ix + ICON_HALF + 4; y = iy - 28
+                // Heart Rate (Top) and Distance (Bottom)
+                x = ix + ICON_HALF + 4;
+                y = iy - 28
             } else {
+                // Steps, Calories, Stress, SpO2
                 var xOff = (i === 4 || i === 5) ? -15 : 0
-                x = ix - 20 + xOff; y = iy + ICON_HALF - 13
+                x = ix - 20 + xOff;
+                y = iy + ICON_HALF - 13
+
+                // Push these 4 corner counters 10 pixels to the right total
+                x += 10
             }
 
-            // Push the counter down by 7 pixels
-            y += 7
+            // Push all counters down by 17 pixels (moved down an extra 10px)
+            y += 17
 
             this.labelWidgets.push(ui.createWidget(ui.widget.TEXT, {
-                x: x, y: y, w: 70, h: 22,
-                text: '0', text_size: 16, color: COLOR_VALUE
+                x: x, y: y,
+                w: 70, h: 28,          // <-- Increased height to prevent clipping
+                text: '0',
+                text_size: 20,         // <-- Increased font size from 16 to 20
+                color: COLOR_VALUE
             }))
         }
 
-        // Time widget (left half of bottom bar) - pushed down from 368 to 375
+        // Time widget (left half of bottom bar)
         this.timeWidget = ui.createWidget(ui.widget.TEXT, {
             x: Math.floor(W / 4 - 35), y: 375, w: 90, h: 35,
             text: '00:00', text_size: 22, color: 0x5AFB67
         })
 
-        // Date widget (right half of bottom bar) - pushed down from 368 to 375
+        // Date widget (right half of bottom bar)
         this.dateWidget = ui.createWidget(ui.widget.TEXT, {
             x: Math.floor(3 * W / 4 - 60) - 20, y: 375, w: 140, h: 35,
             text: '01.01.2026', text_size: 22, color: 0x5AFB67
         })
 
-        // Battery % widget - pushed down from 408 to 415
+        // Battery % widget
         this.battWidget = ui.createWidget(ui.widget.TEXT, {
-            x: 22, y: 415, w: 60, h: 25,
+            x: 98, y: 415, w: 55, h: 25,  // <-- Moved X inward to 98
             text: '100%', text_size: 20, color: 0x5AFB67
         })
     },
@@ -200,7 +228,7 @@ WatchFace({
     // ── Static Icons ─────────────────────────────────────────
 
     _createIcons: function () {
-        var ICON_R = R + 20
+        var ICON_R = R + 25  // <-- Change this line
         for (var i = 0; i < N; i++) {
             var angle = axisAngle(i)
             var lx = polarX(ICON_R, angle)
@@ -208,6 +236,8 @@ WatchFace({
             ui.createWidget(ui.widget.IMG, {
                 x: lx - 21,
                 y: ly - 21,
+                w: unscale(42),
+                h: unscale(42),
                 src: METRICS[i].icon
             })
         }
@@ -271,9 +301,11 @@ WatchFace({
         // ── Stress ──
         try {
             var stressSensor = new Stress()
-            self.values[4] = stressSensor.getCurrent() || 0
+            var st = stressSensor.getCurrent()
+            self.values[4] = (st && st.value !== undefined) ? st.value : 0
             stressSensor.onChange(function () {
-                self.values[4] = stressSensor.getCurrent() || 0
+                var newSt = stressSensor.getCurrent()
+                self.values[4] = (newSt && newSt.value !== undefined) ? newSt.value : 0
                 self._draw()
             })
         } catch (e) { }
@@ -342,10 +374,12 @@ WatchFace({
 
     _drawBackground: function (cv) {
         // Clear chart interior to prevent ghost fills
+        cv.setPaint({ color: 0x000000 })
         var bgPts = []
         for (var bg = 0; bg < N; bg++) {
             bgPts.push({ x: polarX(R, axisAngle(bg)), y: polarY(R, axisAngle(bg)) })
         }
+        bgPts.push({ x: bgPts[0].x, y: bgPts[0].y }) // Explicitly close the loop
         cv.drawPoly({ data_array: bgPts, color: 0x000000, drawFill: true })
     },
 
@@ -414,10 +448,10 @@ WatchFace({
 
     _drawBattery: function (cv) {
         var b = this.batt
-        // Bar only — % text handled by battWidget TEXT widget
-        // Shorter bar: starts at x=80, ends at x=W-50=340
+
         var pad = 3
-        var barX = 90, barW = W - 130, barY = 425, barH = 14
+        // Shorter bar, shifted to the right to sit perfectly next to the centered text
+        var barX = 153, barW = 140, barY = 422, barH = 14  // <-- Adjusted X and Width
         var outerX = barX - pad, outerY = barY - pad
         var outerW = barW + pad * 2, outerH = barH + pad * 2
         var fillW = Math.round((b / 100) * barW)
