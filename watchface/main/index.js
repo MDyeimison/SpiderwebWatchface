@@ -107,25 +107,41 @@ WatchFace({
     // ── Animation (cycled IMG widget on top of canvas) ────────────────────────────────
 
     _startAnimation: function () {
-        var self = this
-        var frame = 0
-        var totalFrames = 18
+        this.frame = 0
+        this.totalFrames = 18
 
-        // Create IMG widget LAST so it is on top of the canvas in Z-order
-        // Frames: 75x107, right-side empty space (x=300, mid-height y=195)
+        // Back to the standard IMG widget that we know works!
         this.animImg = ui.createWidget(ui.widget.IMG, {
             src: 'walking_guy/walking_0.png',
             x: 300,
             y: 200
         })
 
-        // Cycle frames at ~12 fps (every 83ms) via setInterval
+        this._resumeAnimation()
+    },
+
+    _resumeAnimation: function () {
+        var self = this
+        // Clear any existing timer to prevent double-speed glitches
+        if (this.animTimer) {
+            clearInterval(this.animTimer)
+        }
+
+        // Cycle frames at ~12 fps
         this.animTimer = setInterval(function () {
-            frame = (frame + 1) % totalFrames
+            self.frame = (self.frame + 1) % self.totalFrames
             if (self.animImg) {
-                self.animImg.setProperty(ui.prop.SRC, 'walking_guy/walking_' + frame + '.png')
+                self.animImg.setProperty(ui.prop.SRC, 'walking_guy/walking_' + self.frame + '.png')
             }
         }, 83)
+    },
+
+    _pauseAnimation: function () {
+        // Kill the JS timer to save battery when the screen is off
+        if (this.animTimer) {
+            clearInterval(this.animTimer)
+            this.animTimer = null
+        }
     },
 
     // ── Canvas ───────────────────────────────────────────────────────────────────
@@ -434,9 +450,16 @@ WatchFace({
 
     onResume: function () {
         this._draw()
+        // Start walking when screen wakes up
+        this._resumeAnimation()
+    },
+
+    onPause: function () {
+        // Stop walking when screen turns off (Saves your battery!)
+        this._pauseAnimation()
     },
 
     onDestroy: function () {
-        if (this.animTimer) { clearInterval(this.animTimer) }
+        this._pauseAnimation()
     }
 })
