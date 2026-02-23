@@ -257,6 +257,7 @@ WatchFace({
         // ── Time (primary redraw trigger) ──
         try {
             var timeSensor = new Time()
+            self.timeSensor = timeSensor
             self._updateTime(timeSensor)
             timeSensor.onPerMinute(function () {
                 self._updateTime(timeSensor)
@@ -528,6 +529,18 @@ WatchFace({
 
     onResume: function () {
         this.isScreenOn = true // Re-enable drawing
+
+        // Force an immediate update of time and battery so they aren't stale on wake
+        if (this.timeSensor) {
+            this._updateTime(this.timeSensor)
+        }
+        if (this.battSensor) {
+            var b = this.battSensor.getCurrent()
+            if (b !== undefined && b !== null) {
+                this.batt = (b.value !== undefined) ? b.value : b
+            }
+        }
+
         this._draw() // Force an immediate redraw to clear stale values generated while sleeping
         // Start walking when screen wakes up
         this._resumeAnimation()
