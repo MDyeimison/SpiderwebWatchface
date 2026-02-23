@@ -261,14 +261,21 @@ WatchFace({
             timeSensor.onPerMinute(function () {
                 self._updateTime(timeSensor)
 
-                // Force-poll Stress and SpO2 because their onChange events are unreliable
-                if (self.stressSensor) {
-                    var st = self.stressSensor.getCurrent()
-                    self.values[4] = (st && st.value !== undefined) ? st.value : 0
-                }
-                if (self.spo2Sensor) {
-                    var sp = self.spo2Sensor.getCurrent()
-                    self.values[5] = (sp && sp.value !== undefined) ? sp.value : 0
+                // Force-poll Stress, SpO2, and Battery because their onChange events are unreliable
+                // ONLY when the screen is active, to conserve hardware battery
+                if (self.isScreenOn) {
+                    if (self.stressSensor) {
+                        var st = self.stressSensor.getCurrent()
+                        self.values[4] = (st && st.value !== undefined) ? st.value : 0
+                    }
+                    if (self.spo2Sensor) {
+                        var sp = self.spo2Sensor.getCurrent()
+                        self.values[5] = (sp && sp.value !== undefined) ? sp.value : 0
+                    }
+                    if (self.battSensor) {
+                        var b = self.battSensor.getCurrent()
+                        if (b !== undefined && b !== null) self.batt = (b.value !== undefined) ? b.value : b
+                    }
                 }
 
                 self._draw()
@@ -351,11 +358,16 @@ WatchFace({
 
         // ── Battery ──
         try {
-            var battSensor = new Battery()
-            self.batt = battSensor.getCurrent() || 100
-            battSensor.onChange(function () {
-                self.batt = battSensor.getCurrent() || 100
-                self._draw()
+            self.battSensor = new Battery()
+            var initB = self.battSensor.getCurrent()
+            self.batt = (initB !== undefined && initB !== null) ? ((initB.value !== undefined) ? initB.value : initB) : 100
+
+            self.battSensor.onChange(function () {
+                var newB = self.battSensor.getCurrent()
+                if (newB !== undefined && newB !== null) {
+                    self.batt = (newB.value !== undefined) ? newB.value : newB
+                    self._draw()
+                }
             })
         } catch (e) { }
     },
